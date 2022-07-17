@@ -23,6 +23,11 @@ AtomicBombEffect >> reApplyEffectTo: aSpaceship on: aBoard [
 	aBoard moveAllBackToBeginning
 ]
 
+{ #category : #effects }
+AtomicBombEffect >> reverseEffect [
+	
+]
+
 { #category : #accessing }
 AtomicBombEffect >> typeOfEffect [
 

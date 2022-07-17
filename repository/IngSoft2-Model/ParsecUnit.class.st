@@ -52,6 +52,12 @@ ParsecUnit >> inParsecs [
 	^ parsecAmount
 ]
 
+{ #category : #operations }
+ParsecUnit >> invertValue [
+
+	parsecAmount := parsecAmount * -1
+]
+
 { #category : #initialization }
 ParsecUnit >> of: anAmountOfParsecs [
 

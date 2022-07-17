@@ -186,7 +186,7 @@ BoxTest >> testMoonWalkBoxEffectDisplacesEightPlacesBackwards [
 BoxTest >> testSpeedUpBoxEffectDisplacesFourPlacesForwards [
 
 	| box anEffect |
-	anEffect := SpeedUpEffect new.
+	anEffect := SpeedUpEffect create.
 	box := Box with: anEffect.
 	self assert: box effectOnPosition equals: 4
 ]

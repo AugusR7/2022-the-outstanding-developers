@@ -113,39 +113,6 @@ BoardTest >> testABoardOfTenBoxesCreatedWithASequenceHasTheHardcodedAmountOfBoxe
 ]
 
 { #category : #tests }
-BoardTest >> testASpaceshipCannotPlayWhenItIsNotItsTurn [
-
-	| aBoxDistribution aBoard n parsecs aLoadedDie anOustandingGame aCardDistribution |
-	n := 100.
-	parsecs := ParsecUnit of: 100.
-	aBoxDistribution := OrderedCollection new.
-	aBoxDistribution add:
-		(Distribution withProbabilityOf: 1 for: NoEffect).
-	aLoadedDie := LoadedDie with: 1.
-	aCardDistribution := OrderedCollection new.
-
-	aCardDistribution add:
-		(Distribution withProbabilityOf: 1 for: SpeedCard).
-	aBoard := Board
-		          of: n
-		          and: parsecs
-		          playedFor: 1
-		          givenBy: aBoxDistribution.
-	anOustandingGame := OutstandingSpaceshipsGame
-		                    playedByMany:
-		                    { 'Enterprise'. 'Zathura'. 'Delorean' }
-		                    on: aBoard
-		                    throwing: aLoadedDie
-		                    using: aCardDistribution.
-	anOustandingGame play.
-	anOustandingGame play.
-	self
-		should: [ aBoard move: 'Enterprise' by: 15 ]
-		raise: Error
-		withMessage: 'This is not the players turn'
-]
-
-{ #category : #tests }
 BoardTest >> testASpaceshipThatLandsOnABoxWithNoEffectDoesntMove [
 
 	| aBoard aBoxDistribution aLoadedDie aCardDistribution anOutstandingGame |
@@ -179,7 +146,7 @@ BoardTest >> testASpaceshipThatLandsOnABoxWithSpeedUpEffectEndsUpFourBoxesAfter 
 
 	| aBoard noEffect speedUpEffect boxSequence box1 box2 box3 box4 box5 aCardDistribution anOutstandingGame |
 	noEffect := NoEffect new.
-	speedUpEffect := SpeedUpEffect new.
+	speedUpEffect := SpeedUpEffect create.
 
 	aCardDistribution := OrderedCollection new.
 	aCardDistribution add:
@@ -208,9 +175,108 @@ BoardTest >> testASpaceshipThatLandsOnABoxWithSpeedUpEffectEndsUpFourBoxesAfter 
 		                     on: aBoard
 		                     throwing: (LoadedDie with: 1)
 		                     using: aCardDistribution.
+
 	anOutstandingGame play.
 
 	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 5
+]
+
+{ #category : #tests }
+BoardTest >> testASpaceshipTryingToPlayWhenItIsNotItsTurnGoesBackTwoBoxes [
+
+	| aBoxDistribution aBoard n parsecs anOustandingGame aCardDistribution |
+	n := 100.
+	parsecs := ParsecUnit of: 100.
+	aBoxDistribution := OrderedCollection new.
+	aBoxDistribution add:
+		(Distribution withProbabilityOf: 1 for: NoEffect).
+	aCardDistribution := OrderedCollection new.
+
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: SpeedCard).
+	aBoard := Board
+		          of: n
+		          and: parsecs
+		          playedFor: 1
+		          givenBy: aBoxDistribution.
+	anOustandingGame := OutstandingSpaceshipsGame
+		                    playedByMany:
+		                    { 'Enterprise'. 'Zathura'. 'Delorean' }
+		                    on: aBoard
+		                    throwing: (LoadedDie with: 3)
+		                    using: aCardDistribution.
+	anOustandingGame play.
+	anOustandingGame play.
+	anOustandingGame play.
+	anOustandingGame play.
+	anOustandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 6.
+	self assert: (aBoard boxPositionOf: 'Zathura') equals: 6.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 3.
+	aBoard move: 'Enterprise' by: 15.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 4.
+	
+]
+
+{ #category : #tests }
+BoardTest >> testASpaceshipTryingToPlayWhenItIsNotItsTurnLossesItsNextTurn [
+
+	| aBoxDistribution aBoard parsecs anOustandingGame aCardDistribution |
+	parsecs := ParsecUnit of: 100.
+	aBoxDistribution := OrderedCollection new.
+	aBoxDistribution add:
+		(Distribution withProbabilityOf: 1 for: NoEffect).
+	aCardDistribution := OrderedCollection new.
+
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: SpeedCard).
+
+	aBoard := Board
+		          of: 20
+		          and: parsecs
+		          playedFor: 1
+		          givenBy: aBoxDistribution.
+	anOustandingGame := OutstandingSpaceshipsGame
+		                    playedByMany:
+		                    { 'Enterprise'. 'Zathura'. 'Delorean' }
+		                    on: aBoard
+		                    throwing: (LoadedDie with: 3)
+		                    using: aCardDistribution.
+	anOustandingGame play.
+	anOustandingGame play.
+	aBoard move: 'Enterprise' by: 15.
+	anOustandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 1.
+	self assert: (aBoard boxPositionOf: 'Zathura') equals: 3.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 3.
+	"---------------------"
+	anOustandingGame play.
+	anOustandingGame play.
+	anOustandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 1.
+	self assert: (aBoard boxPositionOf: 'Zathura') equals: 6.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 6.
+	"---------------------"
+
+	anOustandingGame play.
+	aBoard move: 'Delorean' by: 1.
+	anOustandingGame play.
+	anOustandingGame play.
+
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 4.
+	self assert: (aBoard boxPositionOf: 'Zathura') equals: 9.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 4.
+	"---------------------"
+	anOustandingGame play.
+	anOustandingGame play.
+	anOustandingGame play.
+
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 7.
+	self assert: (aBoard boxPositionOf: 'Zathura') equals: 12.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 7.
+	
+	
+	
 ]
 
 { #category : #tests }
@@ -903,7 +969,7 @@ BoardTest >> testSpeedUpDoesntTriggerAnotherSpeedUp [
 
 	| board anEffect speedUpBox box aCardDistribution anOutstandingGame |
 	anEffect := NoEffect new.
-	speedUpBox := SpeedUpEffect new.
+	speedUpBox := SpeedUpEffect create.
 
 	aCardDistribution := OrderedCollection new.
 	aCardDistribution add:

@@ -1,13 +1,16 @@
 Class {
 	#name : #WormHoleEffect,
 	#superclass : #Object,
+	#instVars : [
+		'displacement'
+	],
 	#category : #'IngSoft2-Model'
 }
 
 { #category : #'instance creation' }
 WormHoleEffect class >> create [
 
-	^ self new
+	^ self new create
 ]
 
 { #category : #effects }
@@ -20,6 +23,12 @@ WormHoleEffect >> applyEffectOn: aBoard [
 WormHoleEffect >> applyEffectTo: aSpaceship on: aBoard [
 
 	^ self applyEffectOn: aBoard
+]
+
+{ #category : #initialization }
+WormHoleEffect >> create [
+
+	displacement := -4
 ]
 
 { #category : #effects }

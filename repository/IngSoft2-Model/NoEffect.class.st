@@ -36,6 +36,12 @@ NoEffect >> reApplyEffectTo: aSpaceship on: aBoard [
 		by: (self applyEffectTo: aSpaceship on: aBoard)
 ]
 
+{ #category : #effects }
+NoEffect >> reverseEffect [
+
+	
+]
+
 { #category : #accessing }
 NoEffect >> typeOfEffect [
 

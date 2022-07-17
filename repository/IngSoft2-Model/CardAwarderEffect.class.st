@@ -86,3 +86,9 @@ CardAwarderEffect >> reApplyEffectTo: aSpaceship on: aBoard [
 		movePlayingSpaceshipAt: (aBoard positionOf: aSpaceship)
 		by: (self applyEffectTo: aSpaceship on: aBoard)
 ]
+
+{ #category : #effects }
+CardAwarderEffect >> reverseEffect [
+
+	
+]
