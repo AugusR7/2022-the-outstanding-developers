@@ -76,6 +76,12 @@ HyperJumpEffect >> randomlyOf: aSequenceSize and: aMeasurementUnit [
 	parsecsValuesHandler := SequenceHandler for: sequenceUnits size
 ]
 
+{ #category : #effects }
+HyperJumpEffect >> reverseEffect [
+
+	sequenceUnits do: [ :sequenceUnit | sequenceUnit invertValue ]
+]
+
 { #category : #accessing }
 HyperJumpEffect >> typeOfEffect [
 

@@ -172,6 +172,12 @@ OutstandingSpaceshipsGame >> initializeWith: aBoard many: spaceships throwing: s
 	self dealWith: aCardDistribution
 ]
 
+{ #category : #playing }
+OutstandingSpaceshipsGame >> invertBoxAt: aBoardPosition [
+
+	board reverseEffectOf: aBoardPosition
+]
+
 { #category : #accessing }
 OutstandingSpaceshipsGame >> lastPlayedCard [
 
@@ -198,11 +204,23 @@ OutstandingSpaceshipsGame >> playTurn [
 		ifTrue: [ stateOfGame := GameWonState new ]
 ]
 
+{ #category : #accessing }
+OutstandingSpaceshipsGame >> positionOf: aSpaceship [
+
+	^ board positionOf: aSpaceship
+]
+
 { #category : #playing }
 OutstandingSpaceshipsGame >> repeatEffectOn: aSpaceship [
 
 	board lastBox effect reApplyEffectTo: aSpaceship on: board.
 	lastPlayedCard := RepeatCard create
+]
+
+{ #category : #accessing }
+OutstandingSpaceshipsGame >> spaceshipPlaying [
+
+	^ board spaceshipPlaying
 ]
 
 { #category : #playing }

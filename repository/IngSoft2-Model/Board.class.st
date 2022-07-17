@@ -368,6 +368,12 @@ Board >> rankingPositionOf: aSpaceshipName [
 	^ index
 ]
 
+{ #category : #playing }
+Board >> reverseEffectOf: aBoardPosition [
+
+	(boxes at: aBoardPosition) effect reverseEffect
+]
+
 { #category : #accessing }
 Board >> spaceshipPlaying [
 

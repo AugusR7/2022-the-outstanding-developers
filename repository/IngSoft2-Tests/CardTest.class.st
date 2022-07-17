@@ -341,6 +341,147 @@ CardTest >> testCancellationCardCantBePlayedIfThereAreNoPermanentCardsInGame [
 ]
 
 { #category : #tests }
+CardTest >> testCancellationCardRemovesAReversalPermanentCard [
+
+	| aBoard aCardDistribution anotherCardDistribution cardAwarderEffect box1 box2 box3 box4 box5 anOutstandingGame |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add: (Distribution
+			 withProbabilityOf: 1
+			 for: ReversalCard).
+	
+	anotherCardDistribution := OrderedCollection new.
+	anotherCardDistribution add: (Distribution
+			 withProbabilityOf: 1
+			 for: CancellationCard).
+	cardAwarderEffect := CardAwarderEffect with: anotherCardDistribution.
+	
+	box1 := Box with: cardAwarderEffect.
+	box2 := Box with: NoEffect new. 
+	box3 := Box with: NoEffect new.
+	box4 := Box with: NoEffect new.
+	box5 := Box with: NoEffect new.
+
+	aBoard := Board
+		          of: 10
+		          and: (ParsecUnit of: 10)
+		          playedFor: 1
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 1. 2. 1. 1})
+		                     using: aCardDistribution.
+	
+	anOutstandingGame play.
+	anOutstandingGame play.
+	
+	anOutstandingGame
+		throws: ReversalCard
+		from: 'Enterprise'.
+	anOutstandingGame play.
+	anOutstandingGame play.
+
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 2.
+	self assert: (aBoard lapOf: 'Enterprise') equals: 1.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 3.
+	self assert: (aBoard lapOf: 'Delorean') equals: 1.
+
+	anOutstandingGame
+		throws:
+		(CancellationCard thrownAt: (ReversalCard thrownAt: (BoardPosition at: 1 in: 1)))
+		from: 'Enterprise'.
+	
+	anOutstandingGame play.
+	anOutstandingGame play.
+
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 3.
+	self assert: (aBoard lapOf: 'Enterprise') equals: 1.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 5.
+	self assert: (aBoard lapOf: 'Delorean') equals: 1
+]
+
+{ #category : #tests }
+CardTest >> testCancellationCardRemovesAReversalSpeedUpCard [
+
+	| aBoard aCardDistribution anotherCardDistribution cardAwarderEffect box1 box2 box3 box4 box5 anOutstandingGame speedUpEffect |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add: (Distribution
+			 withProbabilityOf: 1
+			 for: ReversalCard).
+	
+	anotherCardDistribution := OrderedCollection new.
+	anotherCardDistribution add: (Distribution
+			 withProbabilityOf: 1
+			 for: CancellationCard).
+	cardAwarderEffect := CardAwarderEffect with: anotherCardDistribution.
+	speedUpEffect := SpeedUpEffect create.
+	
+	box1 := Box with: cardAwarderEffect.
+	box2 := Box with: NoEffect new. 
+	box3 := Box with: speedUpEffect.
+	box4 := Box with: speedUpEffect.
+	box5 := Box with: NoEffect new.
+
+	aBoard := Board
+		          of: 10
+		          and: (ParsecUnit of: 10)
+		          playedFor: 3
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 1. 1. 3. 1. 2. 7. 1. 4})
+		                     using: aCardDistribution.
+	
+	anOutstandingGame play. 'E1'.
+	anOutstandingGame play. 'D1'.
+	
+	anOutstandingGame play. 'E8'.
+	anOutstandingGame play. 'D2'.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 8.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 2.
+	
+	anOutstandingGame
+		throws: ReversalCard
+		from: 'Enterprise'.
+
+	anOutstandingGame play. 'E10'.
+	anOutstandingGame play. 'D4'.
+
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 10.
+	self assert: (aBoard lapOf: 'Enterprise') equals: 1.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 5.
+	self assert: (aBoard lapOf: 'Delorean') equals: 1.
+
+	anOutstandingGame
+		throws:
+		(CancellationCard thrownAt: (ReversalCard thrownAt: (BoardPosition at: 8 in: 1)))
+		from: 'Enterprise'.
+	
+	anOutstandingGame play.
+	anOutstandingGame play.
+
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 1.
+	self assert: (aBoard lapOf: 'Enterprise') equals: 2.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1.
+	self assert: (aBoard lapOf: 'Delorean') equals: 2
+]
+
+{ #category : #tests }
 CardTest >> testCancellationCardRemovesASpeedPermanentCard [
 
 	| aBoard aCardDistribution anotherCardDistribution cardAwarderEffect box1 box2 box3 box4 box5 anOutstandingGame |
@@ -394,11 +535,9 @@ CardTest >> testCancellationCardRemovesASpeedPermanentCard [
 	self assert: (aBoard lapOf: 'Enterprise') equals: 1.
 	self assert: (aBoard boxPositionOf: 'Delorean') equals: 5.
 	self assert: (aBoard lapOf: 'Delorean') equals: 1.
-
 	anOutstandingGame
 		throws: (CancellationCard
-				 thrownAt: (SpeedCard thrownAt: 'Enterprise')
-				 )
+				 thrownAt: (SpeedCard thrownAt: 'Enterprise'))
 		from: 'Enterprise'.
 	anOutstandingGame play.
 	anOutstandingGame play.
@@ -838,7 +977,7 @@ CardTest >> testRedoRepeatsARepeatCard [
 
 	box1 := Box with: NoEffect new.
 	box2 := Box with: cardAwarderRepeatEffect.
-	box3 := Box with: SpeedUpEffect new.
+	box3 := Box with: SpeedUpEffect create.
 	box4 := Box with: NoEffect new.
 	box5 := Box with: NoEffect new.
 
@@ -1472,7 +1611,6 @@ CardTest >> testRepeatReplaysNoEffectOnPosition [
 	self assert: (aBoard boxPositionOf: 'Delorean') equals: 3.
 
 	anOutstandingGame play.
-
 	anOutstandingGame
 		throws: (RepeatCard thrownAt: 'Delorean')
 		from: 'Enterprise'.
@@ -1575,6 +1713,330 @@ CardTest >> testRepeatReplaysWormHoleEffect [
 
 	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 1.
 	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1
+]
+
+{ #category : #tests }
+CardTest >> testReversalHasNoEffectOnAtomicBombEffect [
+
+	| aBoard aCardDistribution box1 box2 box3 box4 box5 anOutstandingGame atomicBombEffect speedUpEffect |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: ReversalCard).
+	
+	atomicBombEffect := AtomicBombEffect create.
+	speedUpEffect := SpeedUpEffect create.
+
+	box1 := Box with: speedUpEffect.
+	box2 := Box with: NoEffect new.
+	box3 := Box with: NoEffect new.
+	box4 := Box with: NoEffect new.
+	box5 := Box with: atomicBombEffect.
+
+	aBoard := Board
+		          of: 20
+		          and: (ParsecUnit of: 20)
+		          playedFor: 1
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 1. 2. 2. 3 })
+		                     using: aCardDistribution.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 5.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 2.
+	
+	anOutstandingGame 
+		throws: ReversalCard 
+		from: 'Enterprise'.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 7.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 1.	
+
+]
+
+{ #category : #tests }
+CardTest >> testReversalHasNoEffectOnCardAwarderEffect [
+
+	| aBoard aCardDistribution box1 box2 box3 box4 box5 anOutstandingGame cardAwarderEffect anotherCardDistribution |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: ReversalCard).
+	
+	anotherCardDistribution := OrderedCollection new.
+	anotherCardDistribution add: (Distribution
+			 withProbabilityOf: 1
+			 for: CancellationCard).
+	
+	cardAwarderEffect := CardAwarderEffect with: anotherCardDistribution.
+
+	box1 := Box with: NoEffect new.
+	box2 := Box with: NoEffect new.
+	box3 := Box with: NoEffect new.
+	box4 := Box with: NoEffect new.
+	box5 := Box with: cardAwarderEffect.
+
+	aBoard := Board
+		          of: 20
+		          and: (ParsecUnit of: 20)
+		          playedFor: 1
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 5. 1. 1. 1 })
+		                     using: aCardDistribution.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 5.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1.
+	
+	anOutstandingGame 
+		throws: ReversalCard 
+		from: 'Enterprise'.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 6.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 2.
+
+]
+
+{ #category : #tests }
+CardTest >> testReversalInvertsHyperJumpEffect [
+
+	| aBoard aCardDistribution box1 box2 box3 box4 box5 anOutstandingGame hyperJumpEffect |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: ReversalCard).
+	
+	hyperJumpEffect := HyperJumpEffect with: {
+		ParsecUnit of: 3. 
+		ParsecUnit of: 2. 
+		ParsecUnit of: 1}.
+
+	box1 := Box with: NoEffect new.
+	box2 := Box with: hyperJumpEffect.
+	box3 := Box with: NoEffect new.
+	box4 := Box with: NoEffect new.
+	box5 := Box with: hyperJumpEffect.
+
+	aBoard := Board
+		          of: 20
+		          and: (ParsecUnit of: 20)
+		          playedFor: 1
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 2. 1. 1. 4. 1. 4 })
+		                     using: aCardDistribution.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 5.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1.
+
+	anOutstandingGame 
+		throws: ReversalCard 
+		from: 'Enterprise'.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 6.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 3.
+	
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 6.
+
+]
+
+{ #category : #tests }
+CardTest >> testReversalInvertsMoonWalkEffect [
+
+	| aBoard aCardDistribution box1 box2 box3 box4 box5 anOutstandingGame moonWalkEffect |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: ReversalCard).
+
+	moonWalkEffect := MoonWalkEffect displacing: 3.
+
+	box1 := Box with: NoEffect new.
+	box2 := Box with: moonWalkEffect.
+	box3 := Box with: NoEffect new.
+	box4 := Box with: NoEffect new.
+	box5 := Box with: moonWalkEffect.
+
+	aBoard := Board
+		          of: 20
+		          and: (ParsecUnit of: 20)
+		          playedFor: 1
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 2. 1. 1. 1 })
+		                     using: aCardDistribution.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 2.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1.
+
+	anOutstandingGame 
+		throws: ReversalCard 
+		from: 'Enterprise'.
+	
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 3.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 2.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 6.	
+]
+
+{ #category : #tests }
+CardTest >> testReversalInvertsSpeedUpEffect [
+
+	| aBoard aCardDistribution box1 box2 box3 box4 box5 anOutstandingGame speedUpEffect |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: ReversalCard).
+
+	speedUpEffect := SpeedUpEffect create.
+
+	box1 := Box with: speedUpEffect.
+	box2 := Box with: NoEffect new.
+	box3 := Box with: NoEffect new.
+	box4 := Box with: NoEffect new.
+	box5 := Box with: speedUpEffect.
+
+	aBoard := Board
+		          of: 20
+		          and: (ParsecUnit of: 20)
+		          playedFor: 1
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 1. 4. 2. 1 })
+		                     using: aCardDistribution.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 5.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 4.
+
+	anOutstandingGame 
+		throws: ReversalCard 
+		from: 'Enterprise'.
+	
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 7.
+	
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1.
+	
+]
+
+{ #category : #tests }
+CardTest >> testReversalInvertsWormHoleEffect [
+
+	| aBoard aCardDistribution box1 box2 box3 box4 box5 anOutstandingGame wormHoleEffect |
+	aCardDistribution := OrderedCollection new.
+	aCardDistribution add:
+		(Distribution withProbabilityOf: 1 for: ReversalCard).
+
+	wormHoleEffect := WormHoleEffect create.
+
+	box1 := Box with: NoEffect new.
+	box2 := Box with: wormHoleEffect.
+	box3 := Box with: NoEffect new.
+	box4 := Box with: NoEffect new.
+	box5 := Box with: wormHoleEffect.
+
+	aBoard := Board
+		          of: 20
+		          and: (ParsecUnit of: 20)
+		          playedFor: 1
+		          with: { 
+				          box1.
+				          box2.
+				          box3.
+				          box4.
+				          box5 }.
+
+	anOutstandingGame := OutstandingSpaceshipsGame
+		                     playedByMany: { 'Enterprise'. 'Delorean' }
+		                     on: aBoard
+		                     throwing:
+		                     (LoadedDie withSequence: { 10. 1. 2. 5 })
+		                     using: aCardDistribution.
+	
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 6.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 1.
+
+	anOutstandingGame 
+		throws: ReversalCard 
+		from: 'Enterprise'.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 8.
+
+	anOutstandingGame play.
+	self assert: (aBoard boxPositionOf: 'Delorean') equals: 6.
 ]
 
 { #category : #tests }

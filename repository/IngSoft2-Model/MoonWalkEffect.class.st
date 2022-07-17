@@ -61,6 +61,12 @@ MoonWalkEffect >> reApplyEffectTo: aSpaceship on: aBoard [
 	aBoard moveAllExcept: aSpaceship by: self effectOnPosition
 ]
 
+{ #category : #effects }
+MoonWalkEffect >> reverseEffect [
+
+	displacement := displacement * -1
+]
+
 { #category : #accessing }
 MoonWalkEffect >> typeOfEffect [
 

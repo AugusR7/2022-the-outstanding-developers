@@ -179,7 +179,7 @@ BoardTest >> testASpaceshipThatLandsOnABoxWithSpeedUpEffectEndsUpFourBoxesAfter 
 
 	| aBoard noEffect speedUpEffect boxSequence box1 box2 box3 box4 box5 aCardDistribution anOutstandingGame |
 	noEffect := NoEffect new.
-	speedUpEffect := SpeedUpEffect new.
+	speedUpEffect := SpeedUpEffect create.
 
 	aCardDistribution := OrderedCollection new.
 	aCardDistribution add:
@@ -208,6 +208,7 @@ BoardTest >> testASpaceshipThatLandsOnABoxWithSpeedUpEffectEndsUpFourBoxesAfter 
 		                     on: aBoard
 		                     throwing: (LoadedDie with: 1)
 		                     using: aCardDistribution.
+
 	anOutstandingGame play.
 
 	self assert: (aBoard boxPositionOf: 'Enterprise') equals: 5
@@ -903,7 +904,7 @@ BoardTest >> testSpeedUpDoesntTriggerAnotherSpeedUp [
 
 	| board anEffect speedUpBox box aCardDistribution anOutstandingGame |
 	anEffect := NoEffect new.
-	speedUpBox := SpeedUpEffect new.
+	speedUpBox := SpeedUpEffect create.
 
 	aCardDistribution := OrderedCollection new.
 	aCardDistribution add:
