@@ -22,7 +22,7 @@ ReversalCard class >> addTo: anOutstandingSpaceshipsGame [
 { #category : #playing }
 ReversalCard class >> cancelIn: anOutstandingSpaceshipsGame [ 
 	"Invertir el casillero"
-	anOutstandingSpaceshipsGame invertBoxAt: boardPosition.
+	anOutstandingSpaceshipsGame invert: boardPosition.
 	"Cancelar"
 	anOutstandingSpaceshipsGame cancel: self create affecting: boardPosition.
 ]
@@ -41,7 +41,7 @@ ReversalCard class >> incorporateTo: anOutstandingSpaceshipsGame [
 		                           spaceshipPlaying.
 	spaceshipBoardPosition := (anOutstandingSpaceshipsGame positionOf:
 		                           currentSpaceshipPlaying) boardPosition.
-	anOutstandingSpaceshipsGame invertBoxAt: spaceshipBoardPosition position.
+	anOutstandingSpaceshipsGame invert: spaceshipBoardPosition position.
 	spaceship := spaceshipBoardPosition position.
 	PermanentCard new incorporate: self to: anOutstandingSpaceshipsGame
 ]
