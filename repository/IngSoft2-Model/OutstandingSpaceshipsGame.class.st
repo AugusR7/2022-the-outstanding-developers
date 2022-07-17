@@ -108,7 +108,7 @@ OutstandingSpaceshipsGame >> cancel: aCard affecting: aSpaceship [
 	| cardToBeRemoved |
 	cardToBeRemoved := spaceshipsAffectingCardDeck findFirst: [ 
 		                   :spaceshipAffectingCardDeck | 
-		                   spaceshipAffectingCardDeck spaceship = aSpaceship 
+		                   spaceshipAffectingCardDeck owner = aSpaceship 
 			                   and: [ 
 			                   spaceshipAffectingCardDeck card name = aCard name ] ].
 	self assertCardCanBeRemoved: cardToBeRemoved.
@@ -127,7 +127,7 @@ OutstandingSpaceshipsGame >> cancelAll: cardType [
 OutstandingSpaceshipsGame >> cardsAffectingOf: aSpaceship [
 
 	^ spaceshipsAffectingCardDeck select: [ :spaceshipCardDeck | 
-		  spaceshipCardDeck spaceship = aSpaceship ]
+		  spaceshipCardDeck owner = aSpaceship ]
 ]
 
 { #category : #properties }
@@ -156,7 +156,7 @@ OutstandingSpaceshipsGame >> dealWith: aCardDistribution [
 OutstandingSpaceshipsGame >> deckOf: aSpaceship [
 
 	^ spaceshipsCardDeck select: [ :spaceshipCardDeck | 
-		  spaceshipCardDeck spaceship = aSpaceship ]
+		  spaceshipCardDeck owner = aSpaceship ]
 ]
 
 { #category : #initialization }
@@ -173,7 +173,7 @@ OutstandingSpaceshipsGame >> initializeWith: aBoard many: spaceships throwing: s
 ]
 
 { #category : #playing }
-OutstandingSpaceshipsGame >> invertBoxAt: aBoardPosition [
+OutstandingSpaceshipsGame >> invert: aBoardPosition [
 
 	board reverseEffectOf: aBoardPosition
 ]
@@ -240,7 +240,7 @@ OutstandingSpaceshipsGame >> throws: aCard from: aSpaceship [
 
 	| cardToBeRemoved |
 	cardToBeRemoved := spaceshipsCardDeck findFirst: [ :spaceshipCardDeck | 
-		                   spaceshipCardDeck spaceship = aSpaceship and: [ 
+		                   spaceshipCardDeck owner = aSpaceship and: [ 
 			                   spaceshipCardDeck card = aCard ] ].
 	self assertCardBelongsToSpaceship: cardToBeRemoved.
 	self

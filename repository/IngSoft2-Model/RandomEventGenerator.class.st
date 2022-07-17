@@ -32,18 +32,11 @@ RandomEventGenerator >> createFor: aSequenceSize using: orderedDistribution [
 		coveredProbabilities := 0.
 		index := 1.
 		randomNumber := random next.
-		[ 
-		randomNumber
-		<
-		((orderedDistribution at: index) probability + coveredProbabilities) ] 
+		[  randomNumber < ((orderedDistribution at: index) probability + coveredProbabilities) ] 
 			whileFalse: [ 
-				coveredProbabilities := coveredProbabilities
-				                        +
-				                        (orderedDistribution at: index)
-					                        probability.
+				coveredProbabilities := coveredProbabilities + (orderedDistribution at: index) probability.
 				index := index + 1 ].
-		randomEvents add:
-			(orderedDistribution at: index) classAssociated create ]
+		randomEvents add: (orderedDistribution at: index) classAssociated create ]
 ]
 
 { #category : #accessing }

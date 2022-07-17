@@ -2,16 +2,16 @@ Class {
 	#name : #SpaceshipCardHolder,
 	#superclass : #Object,
 	#instVars : [
-		'spaceship',
-		'card'
+		'card',
+		'owner'
 	],
 	#category : #'IngSoft2-Model'
 }
 
 { #category : #'instance creation' }
-SpaceshipCardHolder class >> of: aSpaceship holding: aCard [
+SpaceshipCardHolder class >> of: theOwner holding: aCard [
 
-	^ self new of: aSpaceship holding: aCard
+	^ self new of: theOwner holding: aCard
 ]
 
 { #category : #accessing }
@@ -27,14 +27,14 @@ SpaceshipCardHolder >> effectOnThrow [
 ]
 
 { #category : #initialization }
-SpaceshipCardHolder >> of: aSpaceship holding: aCard [
+SpaceshipCardHolder >> of: theOwner holding: aCard [
 
-	spaceship := aSpaceship.
+	owner := theOwner.
 	card := aCard
 ]
 
 { #category : #accessing }
-SpaceshipCardHolder >> spaceship [
+SpaceshipCardHolder >> owner [
 
-	^ spaceship
+	^ owner
 ]

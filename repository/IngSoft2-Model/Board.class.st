@@ -61,7 +61,7 @@ Board class >> of: aNumberOfBoxes and: aLength playedFor: someLaps with: aBoxSeq
 { #category : #properties }
 Board >> amountOfAtomicBombBoxes [
 
-	^ self amountOfBoxes: 'Atomic Bomb'
+	^ self amountOfBoxesOf: 'Atomic Bomb'
 ]
 
 { #category : #properties }
@@ -71,7 +71,7 @@ Board >> amountOfBoxes [
 ]
 
 { #category : #properties }
-Board >> amountOfBoxes: aType [
+Board >> amountOfBoxesOf: aType [
 
 	^ (boxes select: [ :box | box effectType = aType ]) size
 ]
@@ -79,31 +79,31 @@ Board >> amountOfBoxes: aType [
 { #category : #properties }
 Board >> amountOfHyperJumpBoxes [
 
-	^ self amountOfBoxes: 'HyperJump'
+	^ self amountOfBoxesOf: 'HyperJump'
 ]
 
 { #category : #properties }
 Board >> amountOfMoonWalkBoxes [
 
-	^ self amountOfBoxes: 'MoonWalk'
+	^ self amountOfBoxesOf: 'MoonWalk'
 ]
 
 { #category : #properties }
 Board >> amountOfNoEffectBoxes [
 
-	^ self amountOfBoxes: 'No Effect'
+	^ self amountOfBoxesOf: 'No Effect'
 ]
 
 { #category : #properties }
 Board >> amountOfSpeedUpBoxes [
 
-	^ self amountOfBoxes: 'Speedup'
+	^ self amountOfBoxesOf: 'Speedup'
 ]
 
 { #category : #properties }
 Board >> amountOfWormHoleBoxes [
 
-	^ self amountOfBoxes: 'WormHole'
+	^ self amountOfBoxesOf: 'WormHole'
 ]
 
 { #category : #movement }
@@ -411,8 +411,8 @@ Board >> thereIsAWinner [
 { #category : #properties }
 Board >> winner [
 
-	| winnerSpaceship |
-	winnerSpaceship := (positions select: [ :spaceship | 
+	| winnerPosition |
+	winnerPosition := (positions select: [ :spaceship | 
 		                    spaceship position > self amountOfBoxes ]) at: 1.
-	^ winnerSpaceship spaceship
+	^ winnerPosition spaceship
 ]
