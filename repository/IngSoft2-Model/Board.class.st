@@ -8,7 +8,8 @@ Class {
 		'laps',
 		'boardUnitLength',
 		'game',
-		'lastBox'
+		'lastBox',
+		'spaceshipsTurnPenalty'
 	],
 	#category : #'IngSoft2-Model'
 }
@@ -105,6 +106,21 @@ Board >> amountOfWormHoleBoxes [
 	^ self amountOfBoxes: 'WormHole'
 ]
 
+{ #category : #movement }
+Board >> applyPenaltyTo: aSpaceshipIndex [
+
+	| newPositionAfterPenalty |
+	newPositionAfterPenalty := self
+		                           move: (positions at: aSpaceshipIndex) spaceship
+		                           in: (positions at: aSpaceshipIndex) position
+		                           and: (positions at: aSpaceshipIndex) lap
+		                           by: -2.
+	positions
+		replaceFrom: aSpaceshipIndex
+		to: aSpaceshipIndex
+		with: { newPositionAfterPenalty }
+]
+
 { #category : #asserting }
 Board >> assertACardCanBeThrown [
 
@@ -115,8 +131,15 @@ Board >> assertACardCanBeThrown [
 { #category : #asserting }
 Board >> assertThisIsPlayersTurn: index [
 
-	(turnHandler assertSequenceIndexIs: index) ifFalse: [ 
-		Error signal: 'This is not the players turn' ]
+	| spaceship |
+	spaceship := (positions at: index) spaceship.
+	(turnHandler assertSequenceIndexIs: index)
+		ifTrue: [ 
+			spaceshipsTurnPenalty remove: spaceship ifAbsent: [ ^ true ] ]
+		ifFalse: [ 
+			self applyPenaltyTo: index.
+			spaceshipsTurnPenalty add: spaceship ].
+	^ false
 ]
 
 { #category : #playing }
@@ -131,7 +154,7 @@ Board >> assign: aCard to: aSpaceship [
 { #category : #playing }
 Board >> assignToCurrentSpaceship: aCard [
 
-	self assign: aCard to: self lastSpacechipToHavePlayed
+	self assign: aCard to: self lastSpaceshipToHavePlayed
 ]
 
 { #category : #accessing }
@@ -178,7 +201,7 @@ Board >> lastBox [
 ]
 
 { #category : #accessing }
-Board >> lastSpacechipToHavePlayed [
+Board >> lastSpaceshipToHavePlayed [
 
 	^ (positions at: turnHandler sequenceValueInUse) spaceship
 ]
@@ -186,17 +209,13 @@ Board >> lastSpacechipToHavePlayed [
 { #category : #movement }
 Board >> move: aSpaceship by: aNumberOfBoxes [
 
-	| newPositionWithoutEffect positionAmongPositions currentBox movementAfterEffect currentBoardPosition currentLap newPositionAfterEffect |
+	| newPositionWithoutEffect positionAmongPositions currentBox movementAfterEffect newPositionAfterEffect |
 	positionAmongPositions := self positionInPositionsOf: aSpaceship.
-	self assertThisIsPlayersTurn: positionAmongPositions.
-	
-	currentBoardPosition := (positions at: positionAmongPositions)
-		                        position.
-	currentLap := (positions at: positionAmongPositions) lap.
+	(self assertThisIsPlayersTurn: positionAmongPositions) ifFalse: [ ^ self ].
 	newPositionWithoutEffect := self
 		                            move: aSpaceship
-		                            in: currentBoardPosition
-		                            and: currentLap
+		                            in: (positions at: positionAmongPositions) position
+		                            and: (positions at: positionAmongPositions) lap
 		                            by: aNumberOfBoxes.
 
 	newPositionWithoutEffect position > boxes size ifTrue: [ 
@@ -326,7 +345,8 @@ Board >> of: aNumberOfBoxes and: aLength playedFor: someLaps with: aBoxSequence 
 		boxes add: (aBoxSequence at: sequenceHandler nextValue) ].
 	laps := someLaps.
 	boardUnitLength := aLength.
-	lastBox := NoEffect create
+	lastBox := NoEffect create.
+	spaceshipsTurnPenalty := OrderedCollection new
 ]
 
 { #category : #properties }
